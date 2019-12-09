@@ -32,6 +32,7 @@ To be written. (Sorry)
 
 ## Setup
 
+Run these commands to install the correct libraries:
   pip3 install adafruit_GPIO
   pip3 install adafruit_blinka
   pip3 install adafruit_circuitpython_BME280
