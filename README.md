@@ -33,13 +33,16 @@ To be written. (Sorry)
 ## Setup
 
 Run these commands to install the correct libraries:
+```
   pip3 install adafruit_GPIO
   pip3 install adafruit_blinka
   pip3 install adafruit_circuitpython_BME280
   pip3 install Adafruit_CircuitPython_ADS1x15
+```
 
 Setup to run wetherstation.py and re-starting it if it crashes for some reason.
 Edit the secrets.py file like
+```
   secrets = {
     'WUuser' : 'CHANGE TO YOUR WU USER ID',
     'WUpass' : 'CHANGE TO YOUR WU PASSWORD',
@@ -49,5 +52,6 @@ Edit the secrets.py file like
     'sensorMGRS' : ;
     'Military Grid Reference System coordinates (unused)',
     }
+```
 
 Watch the output to be sure the data collection is working and the authentication to Weather Underground is working, too.
