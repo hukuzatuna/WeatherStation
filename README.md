@@ -23,7 +23,7 @@ To be written. (Sorry)
 - Python 3.7
 - pip3
 - Adafruit Blinka
-= Adafruit ADS1x15 CircuitPython library
+- Adafruit ADS1x15 CircuitPython library
 - Adafruit BME28 CircuitPython library
 - urllib
 - w1thermsensor
