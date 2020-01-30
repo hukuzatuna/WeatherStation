@@ -3,8 +3,14 @@
 # weatherstation.py - Collect weather sensor data and upload them to
 # Weather Underground.
 #
+# NOTE: Weather Underground has rolled their server certs and now there is
+# an FQND vs. certificate name mismatch, meaning you can't update your PWS
+# securely. This version doesn't use WU but instead pushes all data to an
+# MQTT broker running on a Raspberry Pi 4. I'll write a module that reads
+# reads the data from there and attempts to push to WU
+#
 # Author:      Phil Moyer (phil@moyer.ai)
-# Date:        December 2019
+# Date:        January 2020
 #
 # License: This program is released under the MIT license. Any
 # redistribution must include this header.
@@ -20,12 +26,12 @@ import time
 import time
 import string
 import math
-#import urllib2
-import urllib.parse
-import urllib.request
+# import urllib2
+# import urllib.parse
+# import urllib.request
 from w1thermsensor import W1ThermSensor
 import RPi.GPIO as GPIO
-import PRMqueue
+import paho.mqtt.client as mqtt
 
 # Third-party modules
 
@@ -34,12 +40,17 @@ import Adafruit_ADS1x15
 
 # Package/application modules
 
+import PRMqueue
+
 
 ######################
 # Globals
 ######################
 
 Debug = True
+
+client = mqtt.Client(protocol=mqtt.MQTTv311)
+client.connect(host="cupcake", port=1883)
 
 ds18b20 = W1ThermSensor()
 # bme = BME280(t_mode=BME280_OSAMPLE_8, p_mode=BME280_OSAMPLE_8, h_mode=BME280_OSAMPLE_8)
@@ -101,7 +112,7 @@ def raintrig(self):
 GPIO.add_event_callback(23, raintrig)
 
 # Weather Underground configuration
-WUserver = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php"
+# WUserver = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php"
 
 fieldLabels = ["humidity",
                "tempf",
@@ -110,13 +121,13 @@ fieldLabels = ["humidity",
                "winddir",
                "windspeedmph"
                "windgustmph",
-           "windgustdir",
-           "windspeedmph_avg2m",
-           "winddir_avg2m",
-           "windgustmph_10m",
-           "windgustdir_10m",
-           "rainin",
-           "dailyrainin"];
+               "windgustdir",
+               "windspeedmph_avg2m",
+               "winddir_avg2m",
+               "windgustmph_10m",
+               "windgustdir_10m",
+               "rainin",
+               "dailyrainin"];
 
 fieldUnits = [ "percent",
                "degrees",
@@ -125,13 +136,13 @@ fieldUnits = [ "percent",
                "degrees",
                "mph",
                "mph",
-           "degrees",
-           "mph",
-           "degrees",
-           "mph",
-           "degrees",
-           "in",
-           "in"];
+               "degrees",
+               "mph",
+               "degrees",
+               "mph",
+               "degrees",
+               "in",
+               "in"];
 
 
 ######################
@@ -484,10 +495,25 @@ while True:
     curWeatherData.WXdata["windgustdir"] = tlongGustDir
     curWeatherData.WXdata["dailyrainin"] = tDailyRain
 
+    client.publish(topic="weather/humidity", payload=humidity)
+    client.publish(topic="weather/tempf", payload=tempf)
+    client.publish(topic="weather/pressure", payload=pressure)
+    client.publish(topic="weather/dewPoint", payload=dewPoint)
+    client.publish(topic="weather/windDeg", payload=windDeg)
+    client.publish(topic="weather/windSpeed", payload=windSpeed)
+    client.publish(topic="weather/hourlyRain", payload=thourlyRain)
+    client.publish(topic="weather/2MinAvgSpd", payload=t2MinAvgSpd)
+    client.publish(topic="weather/2MinAvgDir", payload=t2MinAvgDir)
+    client.publish(topic="weather/10MinMaxSpd", payload=t10MinMaxSpd)
+    client.publish(topic="weather/10MinMaxDir", payload=t10MinMaxDir)
+    client.publish(topic="weather/longGustSpd", payload=tlongGustSpd)
+    client.publish(topic="weather/longGustDir", payload=tlongGustDir)
+    client.publish(topic="weather/DailyRain", payload=tDailyRain)
+
     # Send data to Weather Underground
     # Note: weather cam is handled by viking.
 
-    curWeatherData.sendToWU()
+    # curWeatherData.sendToWU()
 
 # Sample urllib code
 
